@@ -159,35 +159,35 @@ function pd.update()
     end
     --movement
     if pd.buttonIsPressed(pd.kButtonUp) then
-        headY-=1.4
+        headY-=(1.4/3)*lineSize
         --moves the shirt and feet with a delay to the head
-        if headShirtDistance[2] <= -56 then
+        if headShirtDistance[2] <= -18.6*lineSize then
             --moves feet with delay too shirt
             if footYChange <= 0 then
-                footYChange+=1
+                footYChange+=(1/3)*lineSize
             end
-            shirtY-=1.4
+            shirtY-=(1.4/3)*lineSize
         end
     end
     if pd.buttonIsPressed(pd.kButtonDown) then
-        headY+=1.4
-        if headShirtDistance[2] >= -47 then
-            if footYChange >= -5 then
-                footYChange-=1
+        headY+=(1.4/3)*lineSize
+        if headShirtDistance[2] >= -15.6*lineSize then
+            if footYChange >= -1.6*lineSize then
+                footYChange-=(1/3)*lineSize
             end
-            shirtY+=1.4
+            shirtY+=(1.4/3)*lineSize
         end
     end
     if pd.buttonIsPressed(pd.kButtonLeft) then
-        headX-=1.4
-        if headShirtDistance[1] <= -7 then
-            shirtX-=1.4
+        headX-=(1.4/3)*lineSize
+        if headShirtDistance[1] <= -2.3*lineSize then
+            shirtX-=(1.4/3)*lineSize
         end
     end
     if pd.buttonIsPressed(pd.kButtonRight) then
-        headX+=1.4
-        if headShirtDistance[1] >= 7 then
-            shirtX+=1.4
+        headX+=(1.4/3)*lineSize
+        if headShirtDistance[1] >= 2.3*lineSize then
+            shirtX+=(1.4/3)*lineSize
         end
     end
     --zoom in and out --the line size also determines the size of everything
