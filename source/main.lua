@@ -6,9 +6,24 @@ import 'CoreLibs/graphics'
 import 'CoreLibs/sprites'
 import 'CoreLibs/timer'
 import 'CoreLibs/crank'
+--eyes
+eyesImageFolder = {}
+amountOfEyeImage = #pd.file.listFiles("images/eyes")
+for eyeImageImport = 1, amountOfEyeImage do
+    eyesImageFolder[eyeImageImport] = gfx.image.new("images/eyes/eye"..eyeImageImport)
+end
 
-image1 = gfx.image.new("images/image")
+print(amountOfEyeImage)
+--noses
+noseImageFolder = {}
+amountOfNoseImage = #pd.file.listFiles("images/noses")
+for noseImageImport = 1, amountOfNoseImage do
+    noseImageFolder[noseImageImport] = gfx.image.new("images/noses/nose"..noseImageImport)
+end
+print(amountOfNoseImage)
+--
 pd.setCrankSoundsDisabled(true)
+
 --where things are
 headX = 200
 headY = 100
@@ -26,7 +41,36 @@ footPosition2 = {headX, 0}
 lineSize = 3
 footSliding1 = false
 footSliding2 = false
+headDiameter = (lineSize*5)
 
+eye1 = playdate.graphics.sprite.new()
+eye1:add()
+eye1:moveTo(headX+headDiameter/4.5
+, headY-headDiameter/4)
+eye1:setImage(eyesImageFolder[1])
+
+eye2 = playdate.graphics.sprite.new()
+eye2:add()
+eye2:moveTo(headX-headDiameter/4.5, headY-headDiameter/4)
+eye2:setImage(eyesImageFolder[1]) 
+
+nose1 = playdate.graphics.sprite.new()
+nose1:add()
+nose1:moveTo(headX-headDiameter/4.5, headY-headDiameter/4)
+nose1:setImage(noseImageFolder[1], 1)
+--
+
+local headImage = gfx.image.new(headDiameter*2, headDiameter*2)
+gfx.pushContext(headImage)
+  gfx.drawCircleInRect(0, 0, headDiameter*2, headDiameter*2)
+gfx.popContext()
+
+local head1 = gfx.sprite.new()
+head1:moveTo(200, 120)
+head1:setImage(headImage)
+head1:add()
+
+--
 function headMoveBy(x, y)
     headX+=x
     headY+=y
@@ -46,6 +90,7 @@ function pd.update()
     crankTicks = pd.getCrankTicks(7)
     --setting variables updated every loop
 
+    scaledHeadShirtMovement = (1.4/3)*lineSize
     --diameter of the head
     headDiameter = (lineSize*5)
     --middle of head
@@ -76,16 +121,8 @@ function pd.update()
     gfx.setLineWidth(lineSize)
 
     --making things 
-    
-    --head
-    head = gfx.sprite.new(gfx.drawCircleAtPoint(
-        headPosition[1],
-        headPosition[2],
-        --headsize
-        headDiameter
-    ))
-    --shirt
 
+    --shirt
     gfx.drawLine(
         --point A
         neckPosition[1]+headDiameter/2,
@@ -123,7 +160,24 @@ function pd.update()
         footPosition2[1]-headDiameter/3,
         (shirtBottom[2]+20*lineSize)+footYChange
     )
+    --sprite updates
+    eye1:setScale(lineSize/19)
+    eye1:moveTo(headPosition[1]+headDiameter/4.5, headPosition[2]-(headDiameter/3.5)+headDiameter/5)
 
+    eye2:setScale(lineSize/21)
+    eye2:moveTo(headPosition[1]-headDiameter/4.5, headPosition[2]-headDiameter/3.5)
+
+    nose1:setScale(lineSize/15)
+    nose1:moveTo(headPosition[1]-headDiameter, headPosition[2]+headDiameter/3)
+    nose1:setImage(noseImageFolder[1], 1)
+    nose1:setZIndex(10)
+    --making it so head scales every frame =O
+    headImage = gfx.image.new(headDiameter*3, headDiameter*3)
+    gfx.pushContext(headImage)
+        gfx.drawCircleInRect(lineSize, lineSize, (headDiameter*2), (headDiameter*2))
+    gfx.popContext()
+    head1:setImage(headImage)
+    head1:moveTo(headPosition[1]+headDiameter/3, headPosition[2]+headDiameter/3)
     --the leg resets 
     if headPosition[1]>= shirtBottom[1]then
         if footPosition1[1] <= shirtBottom[1] then
@@ -136,12 +190,16 @@ function pd.update()
     end
     --the leg resets other foot
     if headPosition[1]>= shirtBottom[1]then
-        if footPosition2[1] <= shirtBottom[1] then
-            footSliding2 = false
+        if footSliding1 == true then
+            if footPosition2[1] <= shirtBottom[1] then
+                footSliding2 = false
+            end
         end
     else
-        if footPosition2[1] >= shirtBottom[1] then
-            footSliding2 = false
+        if footSliding1 == true then
+            if footPosition2[1] >= shirtBottom[1] then
+                footSliding2 = false
+            end
         end
     end
     if math.abs(headFootDistance1[1]) >= 8.5*lineSize then
@@ -153,41 +211,41 @@ function pd.update()
     --waits until the first foot has slid back a bit before moving the second forward
     if math.abs(headFootDistance1[1]) >= 3.5*lineSize then
         if footSliding2 == false then
-            footPosition2[1] = headPosition[1]
+            footPosition2[1] = headPosition[1]+(scaledHeadShirtMovement/3)
             footSliding2 = true
         end
     end
     --movement
     if pd.buttonIsPressed(pd.kButtonUp) then
-        headY-=(1.4/3)*lineSize
+        headY-=scaledHeadShirtMovement
         --moves the shirt and feet with a delay to the head
         if headShirtDistance[2] <= -18.6*lineSize then
             --moves feet with delay too shirt
             if footYChange <= 0 then
                 footYChange+=(1/3)*lineSize
             end
-            shirtY-=(1.4/3)*lineSize
+            shirtY-=scaledHeadShirtMovement
         end
     end
     if pd.buttonIsPressed(pd.kButtonDown) then
-        headY+=(1.4/3)*lineSize
+        headY+=scaledHeadShirtMovement
         if headShirtDistance[2] >= -15.6*lineSize then
             if footYChange >= -1.6*lineSize then
                 footYChange-=(1/3)*lineSize
             end
-            shirtY+=(1.4/3)*lineSize
+            shirtY+=scaledHeadShirtMovement
         end
     end
     if pd.buttonIsPressed(pd.kButtonLeft) then
-        headX-=(1.4/3)*lineSize
+        headX-=scaledHeadShirtMovement
         if headShirtDistance[1] <= -2.3*lineSize then
-            shirtX-=(1.4/3)*lineSize
+            shirtX-=scaledHeadShirtMovement
         end
     end
     if pd.buttonIsPressed(pd.kButtonRight) then
-        headX+=(1.4/3)*lineSize
+        headX+=scaledHeadShirtMovement
         if headShirtDistance[1] >= 2.3*lineSize then
-            shirtX+=(1.4/3)*lineSize
+            shirtX+=scaledHeadShirtMovement
         end
     end
     --zoom in and out --the line size also determines the size of everything
